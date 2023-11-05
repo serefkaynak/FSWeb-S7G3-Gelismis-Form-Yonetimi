@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
+import axios from 'axios';
 
 
 export default function Form () {
@@ -13,10 +14,18 @@ export default function Form () {
     const handleSubmit = (event) => {
         event.preventDefault();
         console.log(formData);
+    axios
+      .post("https://reqres.in/api/users", formData)
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     }
     
     const handleFormDataChange = (event) => {
-        setFormData({...formData,[event.target.key]: event.target.value })
+        setFormData({...formData,[event.target.name]: event.target.value })
     }
 
     return (
@@ -26,14 +35,14 @@ export default function Form () {
                     <p>
                     <label>
                     Name:
-                    <input type="text"  placeholder='name giriniz' key="name" onChange={handleFormDataChange}/>
+                    <input type="text"  placeholder='name giriniz' name="name" onChange={handleFormDataChange}/>
                     </label>
                     </p>
 
                     <p>
                     <label>
                     Email:
-                    <input type="email" placeholder='email giriniz' key="email" onChange={handleFormDataChange}
+                    <input type="email" placeholder='email giriniz' name="email" onChange={handleFormDataChange}
                     />
                     </label>
                     </p>
@@ -41,7 +50,7 @@ export default function Form () {
                     <p>
                     <label>
                     Password
-                    <input type="password" placeholder='*****'key="password" onChange={handleFormDataChange}/>
+                    <input type="password" placeholder='*****' name="password" onChange={handleFormDataChange}/>
                     </label>
                     </p>
 
@@ -53,12 +62,12 @@ export default function Form () {
                     </p>
 
                     <p>
-                    <button type='submit'>
+                    <button type='submit' onSubmit={handleSubmit}>
                         Submit
                     </button>
                     </p>
                     
-                </form  > 
+                </form> 
             </div>
             
         </div>
