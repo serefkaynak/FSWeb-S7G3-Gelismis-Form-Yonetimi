@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import axios from 'axios';
+import * as Yup from 'yup';
 
 
 export default function Form () {
@@ -9,125 +10,139 @@ export default function Form () {
         email: '',
         password: '',
         kosul: false,
-        rol:'',
-    })
+    });
+    const [formErrors, setFormErrors] = useState({
+        name: '',
+        email: '',
+        password: '',
+        kosul: '',
+    });
+
+    const [formValid, setFormValid] = useState(false);
+
+  const formSchema = Yup.object().shape({
+      name: Yup.string()
+          .required('İsim Soyisim alanı gereklidir.'),
+      email: Yup.string()
+          .email('Geçerli bir email adresi giriniz.')
+          .required('Email alanı gereklidir.'),
+      password: Yup.string()
+          .required('Şifre alanı gereklidir.')
+          .min(8, 'Şifre en az 8 karakter olmalıdır.'),
+      kosul: Yup.boolean()
+          .oneOf([true], 'Kullanım Koşullarını Kabul Etmelisiniz.'),
+  });
 
     const [kullanicilar, setKullanicilar] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
     
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        console.log(`Form Datası Çekildi:`,formData);
+    const submitHandler = (e) => {
+        e.preventDefault();
 
-        if ( formData.email === 'waffle@syrup.com') {
-            setErrorMessage('Bu mail adresi daha önce kullanılmıştır.');
-            return;
+        if (formValid) {
+          // dataları axios ile servea gönder
+        } else {
+          // kullanıcıyı bilgilendir.
+          console.warn('Form Datası valid değil');
         }
+        console.log("formData > ",formData);
+    };
 
-        axios
-        .post("https://reqres.in/api/users", formData)
-        .then((res) => {
-            setKullanicilar([...kullanicilar, res.data]);
-            console.log(`Form Datası API'a gönderildi.:`,kullanicilar);
-            setErrorMessage('');
+    
+    const inputChangeHandler = (e) => {
+      const { name, value, type, checked } = e.target;
+
+      setFormData({
+        ...formData,
+        [name]: type === "checkbox" ? checked : value,
+      });
+
+      Yup.reach(formSchema, name)
+        .validate(type === "checkbox" ? checked : value)
+        .then((valid) => {
+          setFormErrors({
+            ...formErrors,[name]: ""});
         })
         .catch((err) => {
-            console.log(err);
-        });
-
-        setFormData({
-            name: '',
-            email: '',
-            password: '',
-            kosul: false,
-            rol:'',
+          setFormErrors({
+            ...formErrors,[name]: err.errors[0]});
         });
     };
     
-    const handleFormDataChange = (event) => {
-        const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
-        setFormData({...formData,[event.target.name]: value });
-    };
+    useEffect(() => {
+        formSchema.isValid(formData)
+        .then((valid) => setFormValid(valid));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formData]);
 
+    useEffect(() => {
+      console.error("formError :", formErrors)
+    }, [formErrors]);
+    
     return (
         <div>
-          {errorMessage && <p >{errorMessage}</p>}
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="name">
-                Name:
+          {errorMessage && <p>{errorMessage}</p>}
+          <form onSubmit={submitHandler}>
+            <h2>Kullanıcı Formu</h2>
+            <hr></hr>
+            <div>
+              <label>
+                İsim Soyisim:
                 <input
                   id="name"
                   type="text"
                   placeholder="Name"
                   name="name"
-                  onChange={handleFormDataChange}
+                  onChange={inputChangeHandler}
                   value={formData.name}
                 />
               </label>
+              <p>{formErrors.name}</p>
             </div>
   
             <div>
-              <label htmlFor="email">
+              <label>
                 Email:
                 <input
                   id="email"
                   type="email"
                   placeholder="Email"
                   name="email"
-                  onChange={handleFormDataChange}
+                  onChange={inputChangeHandler}
                   value={formData.email}
                 />
               </label>
             </div>
   
             <div >
-              <label htmlFor="password">
-                Password:
+              <label>
+                Şifre:
                 <input
                   id="password"
                   type="password"
                   placeholder="**********"
                   name="password"
-                  onChange={handleFormDataChange}
+                  onChange={inputChangeHandler}
                   value={formData.password}
                 />
               </label>
             </div>
   
             <div>
-              <label htmlFor="kosul">
-                Okudum, Kabul Ediyorum:
+              <label>
+                Kullanım Şartları:
                 <input
                   id="kosul"
                   type="checkbox"
                   name="kosul"
-                  onChange={handleFormDataChange}
+                  onChange={inputChangeHandler}
                   checked={formData.kosul}
                 />
               </label>
             </div>
-  
             <div >
-              <label htmlFor="role">
-                Rol:
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleFormDataChange}
-                >
-                  <option value="">Seçiniz</option>
-                  <option value="admin">Admin</option>
-                  <option value="user">User</option>
-                  <option value="visitor">Visitor</option>
-                </select>
-              </label>
-            </div>
-  
-            <div >
-              <button type="submit" disabled={!formData.kosul}>
-                Submit
+              <button type="submit" disabled={!formValid} >
+                Gönder
               </button>
             </div>
           </form>
