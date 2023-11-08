@@ -11,3 +11,20 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.input-error {
+  color:red;
+  font-size: .75rem;
+  padding: .25rem .5rem 1rem 0rem ;
+}
+
+.kullanici-container {
+  border: 1px solid #ccc;
+  margin: 1rem;
+  padding: 1rem;
+}
+
+.kullanici-container > p {
+  padding: 0.25rem;
+  margin: 0;
+}
