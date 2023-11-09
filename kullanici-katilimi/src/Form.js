@@ -3,7 +3,7 @@
     import axios from "axios";
     import * as Yup from "yup";
 
-    export default function Form({yeniKullaniciEkle}) {
+    export default function Form({ yeniKullaniciEkle }) {
       const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -37,7 +37,8 @@
         e.preventDefault();
 
         if (formValid) {
-          // dataları axios ile servea gönder
+          
+          // dataları axios ile servea gönderiliyor
           axios
             .post("https://reqres.in/api/users", formData)
             .then((res) => {
